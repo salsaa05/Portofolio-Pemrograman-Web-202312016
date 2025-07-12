@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Elektronik Cepat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .product-list button { margin-bottom: 10px; }
+        .output { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-3">Toko Elektronik Cepat</h1>
+        <p class="text-center" id="datetime"></p>
+
+        <div class="row">
+            <!-- Display Produk -->
+            <div class="col-md-8">
+                <img id="slideshow-image" src="" class="img-fluid mb-3" alt="Product Image">
+                <h3 id="product-name"></h3>
+                <p id="product-price"></p>
+                <button class="btn btn-secondary" onclick="gantiGambar(-1)">Previous</button>
+                <button class="btn btn-secondary" onclick="gantiGambar(1)">Next</button>
+            </div>
+
+            <!-- Daftar Produk -->
+            <div class="col-md-4">
+                <h4>Daftar Produk</h4>
+                <div class="product-list" id="product-list"></div>
+            </div>
+        </div>
+
+        <!-- Form Pemesanan -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Form Pemesanan</h4>
+                <form onsubmit="return prosesPesanan()">
+                    <div class="mb-2">
+                        <label>Nama Pemesan:</label>
+                        <input type="text" id="namaPemesan" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Jumlah Pesan:</label>
+                        <input type="number" id="jumlahPesan" class="form-control" min="1">
+                    </div>
+                    <div class="mb-2">
+                        <label>Kode Promo:</label>
+                        <input type="text" id="kodePromo" class="form-control" placeholder="contoh: DISKON10">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Pesan Sekarang</button>
+                </form>
+            </div>
+
+            <div class="col-md-6 output">
+                <h4>Ringkasan Pesanan</h4>
+                <div id="order-summary" class="border p-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var produk = [
+            {
+                nama: "Mesin Cuci Polytron",
+                harga: 1700000,
+                gambar: [
+                    "ms1.jpeg",
+                    "ms2.jpeg",
+                    "ms3.jpeg"
+                ]
+            },
+            {
+                nama: "Vivo X200",
+                harga: 16000000,
+                gambar: [
+                    "hp1.jpeg",
+                    "hp2.jpeg",
+                    "hp3.jpeg"
+                ]
+            },
+            {
+                nama: "printer canon ip2770",
+                harga: 800000,
+                gambar: [
+                    "pc1.jpeg",
+                    "pc2.jpeg"
+                ]
+            }
+        ];
+
+        var indexProduk = 0;
+        var indexGambar = 0;
+
+        setInterval(function() {
+            var now = new Date();
+            document.getElementById("datetime").innerText = now.toLocaleString();
+        }, 1000);
+        var productList = document.getElementById("product-list");
+        produk.forEach(function(item, i) {
+            var btn = document.createElement("button");
+            btn.className = "btn btn-outline-primary w-100";
+            btn.innerText = item.nama;
+            btn.onclick = function() {
+                indexProduk = i;
+                indexGambar = 0;
+                tampilkanProduk();
+            };
+            productList.appendChild(btn);
+        });
+
+        function tampilkanProduk() {
+            var p = produk[indexProduk];
+            document.getElementById("slideshow-image").src = p.gambar[indexGambar];
+            document.getElementById("product-name").innerText = p.nama;
+            document.getElementById("product-price").innerText = "Harga: Rp " + p.harga.toLocaleString();
+        }
+
+        function gantiGambar(arah) {
+            var gambarList = produk[indexProduk].gambar;
+            indexGambar += arah;
+            if (indexGambar < 0) indexGambar = gambarList.length - 1;
+            else if (indexGambar >= gambarList.length) indexGambar = 0;
+            tampilkanProduk();
+        }
+
+        function prosesPesanan() {
+            var nama = document.getElementById("namaPemesan").value.trim();
+            var jumlah = parseInt(document.getElementById("jumlahPesan").value);
+            var kode = document.getElementById("kodePromo").value.trim().toUpperCase();
+
+            if (nama === "" || isNaN(jumlah) || jumlah <= 0) {
+                alert("Nama pemesan dan jumlah pesan harus diisi dengan benar!");
+                return false;
+            }
+
+            var p = produk[indexProduk];
+            var subtotal = p.harga * jumlah;
+            var potongan = 0;
+
+            if (kode === "DISKON10") {
+                potongan = subtotal * 0.10;
+            }
+
+            var totalAkhir = subtotal - potongan;
+            var orderID = "INV-" + Math.floor(Math.random() * 100000);
+
+            document.getElementById("order-summary").innerHTML = `
+                <p><strong>Order ID:</strong> ${orderID}</p>
+                <p><strong>Nama Pemesan:</strong> ${nama}</p>
+                <p><strong>Nama Produk:</strong> ${p.nama}</p>
+                <p><strong>Jumlah:</strong> ${jumlah}</p>
+                <p><strong>Subtotal:</strong> Rp ${subtotal.toLocaleString()}</p>
+                <p><strong>Potongan:</strong> Rp ${potongan.toLocaleString()}</p>
+                <p><strong>Total Akhir:</strong> <strong>Rp ${totalAkhir.toLocaleString()}</strong></p>
+            `;
+            return false; 
+        }
+
+        tampilkanProduk();
+    </script>
+</body>
+</html>
